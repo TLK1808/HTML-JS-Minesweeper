@@ -1,0 +1,451 @@
+<html>
+<head>
+  <title> Minesweeper WIP</title>
+  <link rel="stylesheet" href="Minesweeper.css">
+</head>
+<body id=hintergrund style="background-color:lawngreen">
+
+  <script>
+  var numOfBombs;
+  var numOfFields = 100;
+  var buttons;
+  var checkQueueLength;
+  var scanList = [];
+  var queuePosition = -1;
+  var markerModeStatus = false;
+  var bombLocation = [];
+  var markedBombs;
+  var correctMarkedBombs = 0;
+  var alreadyCounted = [];
+  //var bombsAround = 0;
+function start()
+{
+  numOfBombs = document.getElementById("numOfBombsSettingsBox").value;
+  queuePosition = -1;
+  scanList = [];
+  checkQueueLength = 0;
+  for (var i = 0; i < 100; i++)
+  {
+    document.getElementById(i).value = "";
+  }
+  buttons = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  ];
+  for (var bombcount = 0; bombcount < numOfBombs; bombcount++)
+    {
+        var randomNumber = Math.round(Math.random() * numOfFields);
+          if (0 == buttons[Math.floor(randomNumber/10)][randomNumber%10])
+            {
+              buttons[Math.floor(randomNumber/10)][randomNumber%10] = 1;
+              var newLength = bombLocation.push(randomNumber);
+            }
+            else
+            {
+              bombcount--;
+            }
+            //document.getElementById("debug2").innerHTML = bombcount;
+    }
+}
+
+function test(clicked_id)
+{
+  if (true == markerModeStatus)
+  {
+    if (document.getElementById(clicked_id).value == "Marked")
+    {
+      document.getElementById(clicked_id).value = "";
+      markedBombs--;
+    }
+    else
+    {
+      document.getElementById(clicked_id).value = "Marked";
+      markedBombs++;
+    }
+    //document.getElementById("debug").innerHTML = bombLocation.length;
+    //document.getElementById("debug2").innerHTML = numOfBombs;
+    if (numOfBombs == bombLocation.length)
+    {
+      //document.getElementById("debug2").innerHTML = "numOfBombs";
+      for (var i = 0; i < bombLocation.length; i++)
+      //document.getElementById("debug").innerHTML = bombLocation.length;
+      {
+        //document.getElementById("debug").innerHTML = document.getElementById(bombLocation[i].value);
+        //document.getElementById("debug2").innerHTML = correctMarkedBombs;
+        if (document.getElementById(bombLocation[i]).value == "Marked")
+        {
+          // hier muss sichergestellt werden, dass jede richtig markierte Bombe nur einmal gezählt wird!!!
+          correctMarkedBombs++;
+          var newLength = alreadyCounted.push(bombLocation[i]);
+          for (var j = 0; j < bombLocation.length; j++)
+          {
+            if (alreadyCounted[j] == bombLocation[j])
+            {
+              correctMarkedBombs--;
+            }
+          }
+          document.getElementById("debug").innerHTML = "";
+          document.getElementById("debug2").innerHTML = correctMarkedBombs;
+        }
+        if (correctMarkedBombs == numOfBombs)
+        {
+          alert("You won!");
+        }
+      }
+    }
+  }
+  else
+  {
+    var row = Math.floor(clicked_id/10);
+    var colum = clicked_id%10;
+    var bombsAround = 0;
+    if (row-1 >= 0 && row-1 == Math.floor((clicked_id-11)/10))
+    {
+      if (1 == buttons[Math.floor((clicked_id-11)/10)][(clicked_id-11)%10])
+      {
+        bombsAround++;
+      }
+    }
+    if (row-1 >= 0 && row-1 == Math.floor((clicked_id-10)/10))
+    {
+      if (1 == buttons[Math.floor((clicked_id-10)/10)][(clicked_id-10)%10])
+      {
+        bombsAround++;
+      }
+    }
+    if (row-1 >= 0 && row-1 == Math.floor((clicked_id-9)/10))
+    {
+      if (1 == buttons[Math.floor((clicked_id-9)/10)][(clicked_id-9)%10])
+      {
+        bombsAround++;
+      }
+    }
+    if (row == Math.floor((clicked_id-1)/10))
+    {
+      if (1 == buttons[Math.floor((clicked_id-1)/10)][(clicked_id-1)%10])
+      {
+        bombsAround++;
+      }
+    }
+    if (row == Math.floor((clicked_id+1)/10))
+    {
+      if (1 == buttons[Math.floor((clicked_id+1)/10)][(clicked_id+1)%10])
+      {
+        bombsAround++;
+      }
+    }
+    if (row+1 <= 9 && row+1 == Math.floor((clicked_id+9)/10))
+    {
+      if (1 == buttons[Math.floor((clicked_id+9)/10)][(clicked_id+9)%10])
+      {
+        bombsAround++;
+      }
+    }
+    if (row+1 <= 9 && row+1 == Math.floor((clicked_id+10)/10))
+    {
+      if (1 == buttons[Math.floor((clicked_id+10)/10)][(clicked_id+10)%10])
+      {
+        bombsAround++;
+      }
+    }
+    if (row+1 <= 9 && row+1 == Math.floor((clicked_id+11)/10))
+    {
+      if (1 == buttons[Math.floor((clicked_id+11)/10)][(clicked_id+11)%10])
+      {
+        bombsAround++;
+      }
+    }
+    if (0 == buttons[Math.floor(clicked_id/10)][clicked_id%10] && 0 == bombsAround)
+    {
+      map(clicked_id);
+    }
+    if (0 == buttons[Math.floor(clicked_id/10)][clicked_id%10])
+    {
+      document.getElementById(clicked_id).value = bombsAround;
+    }
+    if (1 == buttons[Math.floor(clicked_id/10)][clicked_id%10])
+    {
+      document.getElementById(clicked_id).value = "Bomb";
+    }
+  }
+}
+function map(clicked_id)
+{
+  //math.floor wird benoetigt sonst komma zahl (keine integer)
+  if (0 == buttons[Math.floor(clicked_id/10)][clicked_id%10])
+  {
+      var row = Math.floor(clicked_id/10);
+      var colum = clicked_id%10;
+      var bombsAround = 0;
+      if (row-1 >= 0 && row-1 == Math.floor((clicked_id-11)/10))
+      {
+        if (1 == buttons[Math.floor((clicked_id-11)/10)][(clicked_id-11)%10])
+        {
+          bombsAround++;
+        }
+      }
+      if (row-1 >= 0 && row-1 == Math.floor((clicked_id-10)/10))
+      {
+        if (1 == buttons[Math.floor((clicked_id-10)/10)][(clicked_id-10)%10])
+        {
+          bombsAround++;
+        }
+      }
+      if (row-1 >= 0 && row-1 == Math.floor((clicked_id-9)/10))
+      {
+        if (1 == buttons[Math.floor((clicked_id-9)/10)][(clicked_id-9)%10])
+        {
+          bombsAround++;
+        }
+      }
+      if (row == Math.floor((clicked_id-1)/10))
+      {
+        if (1 == buttons[Math.floor((clicked_id-1)/10)][(clicked_id-1)%10])
+        {
+          bombsAround++;
+        }
+      }
+      if (row == Math.floor((clicked_id+1)/10))
+      {
+        if (1 == buttons[Math.floor((clicked_id+1)/10)][(clicked_id+1)%10])
+        {
+          bombsAround++;
+        }
+      }
+      if (row+1 <= 9 && row+1 == Math.floor((clicked_id+9)/10))
+      {
+        if (1 == buttons[Math.floor((clicked_id+9)/10)][(clicked_id+9)%10])
+        {
+          bombsAround++;
+        }
+      }
+      if (row+1 <= 9 && row+1 == Math.floor((clicked_id+10)/10))
+      {
+        if (1 == buttons[Math.floor((clicked_id+10)/10)][(clicked_id+10)%10])
+        {
+          bombsAround++;
+        }
+      }
+      if (row+1 <= 9 && row+1 == Math.floor((clicked_id+11)/10))
+      {
+        if (1 == buttons[Math.floor((clicked_id+11)/10)][(clicked_id+11)%10])
+        {
+          bombsAround++;
+        }
+      }
+      document.getElementById(clicked_id).value = bombsAround;
+      if (0 == bombsAround)
+      {
+        if(false == scanList.includes(clicked_id-11) && row-1 >= 0 && row-1 == Math.floor((clicked_id-11)/10))
+        {
+          var newLength = scanList.push(clicked_id-11);
+        }
+        if (false == scanList.includes(clicked_id-10) && row-1 >= 0 && row-1 == Math.floor((clicked_id-10)/10))
+        {
+          var newLength = scanList.push(clicked_id-10);
+        }
+        if (false == scanList.includes(clicked_id-9) && row-1 >= 0 && row-1 == Math.floor((clicked_id-9)/10))
+        {
+          var newLength = scanList.push(clicked_id-9);
+        }
+        if (false == scanList.includes(clicked_id-1) && row == Math.floor((clicked_id-1)/10))
+        {
+          var newLength = scanList.push(clicked_id-1);
+        }
+        if (false == scanList.includes(clicked_id+1) && row == Math.floor((clicked_id+1)/10))
+        {
+          var newLength = scanList.push(clicked_id+1);
+        }
+        if (false == scanList.includes(clicked_id+9) && row+1 <= 9 && row+1 == Math.floor((clicked_id+9)/10))
+        {
+          var newLength = scanList.push(clicked_id+9);
+        }
+        if (false == scanList.includes(clicked_id+10) && row+1 <= 9 && row+1 == Math.floor((clicked_id+10)/10))
+        {
+          var newLength = scanList.push(clicked_id+10);
+        }
+        if (false == scanList.includes(clicked_id+11) && row+1 <= 9 && row+1 == Math.floor((clicked_id+11)/10))
+        {
+          var newLength = scanList.push(clicked_id+11);
+        }
+      }
+      var checkQueueLength = scanList.length;
+      //document.getElementById("debug").innerHTML = checkQueueLength;
+      //if (queuePosition < checkQueueLength)
+      //{
+        queuePosition++;
+        //document.getElementById("debug2").innerHTML = queuePosition;
+        map(scanList[queuePosition]);
+      //}
+  }
+  if (1 == buttons[Math.floor(clicked_id/10)][clicked_id%10])
+  {
+    queuePosition++;
+    map(scanList[queuePosition]);
+  }
+}
+function markerMode()
+{
+  if (false == markerModeStatus)
+  {
+    markerModeStatus = true;
+    document.getElementById("markerModeStatusSign").innerHTML = "true";
+  }
+  else
+  {
+    markerModeStatus = false;
+    document.getElementById("markerModeStatusSign").innerHTML = "false";
+  }
+}
+</script>
+
+<a href="Html5_1.html">zurück</a>
+<input id=startButton type="button" value="Start" onclick="start()">
+<input id=markerModeButton type="button" value="toggle Marker Mode" onclick="markerMode()">
+<div id=markerModeStatusSign>false</div>
+<div id=settingsbox>
+  <h1>Settings</h1>
+  <div>Bombs:</div><input type="number" id="numOfBombsSettingsBox" min="10" max="100" value="10">
+</div>
+<div id=debug>debug Div</div>
+<div id=debug2>debug Div</div>
+
+<table>
+  <tr>
+    <td style="width=10%"><input id=0 type="button" value="test" onclick="test(0);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=1 type="button" value="test" onclick="test(1);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=2 type="button" value="test" onclick="test(2);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=3 type="button" value="test" onclick="test(3);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=4 type="button" value="test" onclick="test(4);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=5 type="button" value="test" onclick="test(5);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=6 type="button" value="test" onclick="test(6);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=7 type="button" value="test" onclick="test(7);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=8 type="button" value="test" onclick="test(8);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=9 type="button" value="test" onclick="test(9);mapUpdate()" class="SpielfeldKnoepfe"></td>
+
+  </tr>
+  <tr>
+    <td style="width=10%"><input id=10 type="button" value="test" onclick="test(10);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=11 type="button" value="test" onclick="test(11);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=12 type="button" value="test" onclick="test(12);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=13 type="button" value="test" onclick="test(13);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=14 type="button" value="test" onclick="test(14);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=15 type="button" value="test" onclick="test(15);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=16 type="button" value="test" onclick="test(16);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=17 type="button" value="test" onclick="test(17);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=18 type="button" value="test" onclick="test(18);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=19 type="button" value="test" onclick="test(19);mapUpdate()" class="SpielfeldKnoepfe"></td>
+
+  </tr>
+  <tr>
+    <td style="width=10%"><input id=20 type="button" value="test" onclick="test(20);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=21 type="button" value="test" onclick="test(21);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=22 type="button" value="test" onclick="test(22);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=23 type="button" value="test" onclick="test(23);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=24 type="button" value="test" onclick="test(24);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=25 type="button" value="test" onclick="test(25);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=26 type="button" value="test" onclick="test(26);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=27 type="button" value="test" onclick="test(27);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=28 type="button" value="test" onclick="test(28);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=29 type="button" value="test" onclick="test(29);mapUpdate()" class="SpielfeldKnoepfe"></td>
+
+  </tr>
+  <tr>
+    <td style="width=10%"><input id=30 type="button" value="test" onclick="test(30);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=31 type="button" value="test" onclick="test(31);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=32 type="button" value="test" onclick="test(32);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=33 type="button" value="test" onclick="test(33);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=34 type="button" value="test" onclick="test(34);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=35 type="button" value="test" onclick="test(35);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=36 type="button" value="test" onclick="test(36);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=37 type="button" value="test" onclick="test(37);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=38 type="button" value="test" onclick="test(38);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=39 type="button" value="test" onclick="test(39);mapUpdate()" class="SpielfeldKnoepfe"></td>
+
+  <tr>
+    <td style="width=10%"><input id=40 type="button" value="test" onclick="test(40);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=41 type="button" value="test" onclick="test(41);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=42 type="button" value="test" onclick="test(42);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=43 type="button" value="test" onclick="test(43);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=44 type="button" value="test" onclick="test(44);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=45 type="button" value="test" onclick="test(45);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=46 type="button" value="test" onclick="test(46);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=47 type="button" value="test" onclick="test(47);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=48 type="button" value="test" onclick="test(48);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=49 type="button" value="test" onclick="test(49);mapUpdate()" class="SpielfeldKnoepfe"></td>
+
+  </tr>
+  <tr>
+    <td style="width=10%"><input id=50 type="button" value="test" onclick="test(50);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=51 type="button" value="test" onclick="test(51);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=52 type="button" value="test" onclick="test(52);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=53 type="button" value="test" onclick="test(53);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=54 type="button" value="test" onclick="test(54);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=55 type="button" value="test" onclick="test(55);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=56 type="button" value="test" onclick="test(56);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=57 type="button" value="test" onclick="test(57);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=58 type="button" value="test" onclick="test(58);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=59 type="button" value="test" onclick="test(59);mapUpdate()" class="SpielfeldKnoepfe"></td>
+
+  </tr>
+  <tr>
+    <td style="width=10%"><input id=60 type="button" value="test" onclick="test(60);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=61 type="button" value="test" onclick="test(61);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=62 type="button" value="test" onclick="test(62);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=63 type="button" value="test" onclick="test(63);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=64 type="button" value="test" onclick="test(64);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=65 type="button" value="test" onclick="test(65);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=66 type="button" value="test" onclick="test(66);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=67 type="button" value="test" onclick="test(67);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=68 type="button" value="test" onclick="test(68);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=69 type="button" value="test" onclick="test(69);mapUpdate()" class="SpielfeldKnoepfe"></td>
+
+  </tr>
+  <tr>
+    <td style="width=10%"><input id=70 type="button" value="test" onclick="test(70);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=71 type="button" value="test" onclick="test(71);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=72 type="button" value="test" onclick="test(72);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=73 type="button" value="test" onclick="test(73);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=74 type="button" value="test" onclick="test(74);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=75 type="button" value="test" onclick="test(75);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=76 type="button" value="test" onclick="test(76);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=77 type="button" value="test" onclick="test(77);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=78 type="button" value="test" onclick="test(78);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=79 type="button" value="test" onclick="test(79);mapUpdate()" class="SpielfeldKnoepfe"></td>
+
+  </tr>
+  <tr>
+    <td style="width=10%"><input id=80 type="button" value="test" onclick="test(80);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=81 type="button" value="test" onclick="test(81);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=82 type="button" value="test" onclick="test(82);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=83 type="button" value="test" onclick="test(83);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=84 type="button" value="test" onclick="test(84);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=85 type="button" value="test" onclick="test(85);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=86 type="button" value="test" onclick="test(86);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=87 type="button" value="test" onclick="test(87);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=88 type="button" value="test" onclick="test(88);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=89 type="button" value="test" onclick="test(89);mapUpdate()" class="SpielfeldKnoepfe"></td>
+
+  </tr>
+  <tr>
+    <td style="width=10%"><input id=90 type="button" value="test" onclick="test(90);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=91 type="button" value="test" onclick="test(91);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=92 type="button" value="test" onclick="test(92);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=93 type="button" value="test" onclick="test(93);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=94 type="button" value="test" onclick="test(94);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=95 type="button" value="test" onclick="test(95);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=96 type="button" value="test" onclick="test(96);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=97 type="button" value="test" onclick="test(97);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=98 type="button" value="test" onclick="test(98);mapUpdate()" class="SpielfeldKnoepfe"></td>
+    <td style="width=10%"><input id=99 type="button" value="test" onclick="test(99);mapUpdate()" class="SpielfeldKnoepfe"></td>
+
+  </tr>
+</table>

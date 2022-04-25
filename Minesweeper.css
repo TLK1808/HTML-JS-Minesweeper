@@ -1,0 +1,36 @@
+table {
+  margin-left:auto;
+  margin-right:auto;
+  background-color:yellow;
+  width: 45vw;
+  height: 45vw;
+  table-layout: fixed;
+}
+.SpielfeldKnoepfe {
+  height: 100%;
+  width: 100%;
+}
+a {
+  float: left;
+}
+#startButton {
+  float: left;
+}
+#debug {
+  float: right;
+}
+#debug2 {
+  float: right;
+}
+#settingsbox {
+  float: left;
+}
+#numOfBombsSettingsBox {
+  background-color:white;
+}
+#markerModeButton {
+  float: left;
+}
+#markerModeStatusSign {
+  float: left;
+}
